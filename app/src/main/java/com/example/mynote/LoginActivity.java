@@ -10,6 +10,10 @@ import android.widget.Toast;
 import android.widget.ImageView;
 import android.animation.ObjectAnimator;
 import androidx.appcompat.app.AppCompatActivity;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.io.OutputStream;
+import org.json.JSONObject;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -18,6 +22,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button loginButton;
     private TextView registerButton;
     private ImageView logo;
+    private boolean success=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,17 +40,13 @@ public class LoginActivity extends AppCompatActivity {
         passwordEditText = findViewById(R.id.password);
         loginButton = findViewById(R.id.login_button);
         registerButton = findViewById(R.id.register_text);
-
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // 登录逻辑
                 String username = usernameEditText.getText().toString();
                 String password = passwordEditText.getText().toString();
-
-                // 这里可以添加验证用户名和密码的逻辑
-                // 示例：简单的用户名和密码检查
-                Toast.makeText(LoginActivity.this, "Invalid credentials", Toast.LENGTH_SHORT).show();
+                loginUser(username, password);
 
             }
         });
@@ -53,12 +54,54 @@ public class LoginActivity extends AppCompatActivity {
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // 跳转到注册页面
-                // 你可以创建一个RegisterActivity类似于LoginActivity
+                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent);
             }
         });
 
     }
+    private void loginUser(String username, String password) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL("https://0975-202-113-189-209.ngrok-free.app/login"); // 后端登录接口
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json");
+                    conn.setDoOutput(true);
+
+                    // 创建 JSON 数据
+                    JSONObject json = new JSONObject();
+                    json.put("username", username);
+                    json.put("password", password);
+
+                    // 发送请求
+                    OutputStream os = conn.getOutputStream();
+                    os.write(json.toString().getBytes("UTF-8"));
+                    os.close();
+
+                    // 处理响应
+                    int responseCode = conn.getResponseCode();
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish(); // 结束登录界面
+                        });
+                    } else {
+                        runOnUiThread(() -> Toast.makeText(LoginActivity.this, "Invalid credentials", Toast.LENGTH_SHORT).show());
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    runOnUiThread(() -> Toast.makeText(LoginActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                }
+            }
+        }).start();
+    }
+
+
 
 }
 
