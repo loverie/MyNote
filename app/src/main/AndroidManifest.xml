@@ -16,6 +16,16 @@
         android:theme="@style/Theme.MyNote"
         tools:targetApi="31">
         <activity
+            android:name=".FuturePlanFragment"
+            android:exported="false"
+            android:theme="@style/Theme.MyNote" />
+        <activity
+            android:name=".TodayPlanFragment"
+            android:exported="false" />
+        <activity
+            android:name=".AddTaskActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true" />
         <activity

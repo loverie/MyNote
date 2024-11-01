@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ImageView;
@@ -23,6 +24,8 @@ public class LoginActivity extends AppCompatActivity {
     private TextView registerButton;
     private ImageView logo;
     private boolean success=false;
+    private ProgressBar loadingSpinner;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +34,8 @@ public class LoginActivity extends AppCompatActivity {
         logo = findViewById(R.id.logo);
         logo.setVisibility(View.VISIBLE);
         logo.setAlpha(0f); // 透明度设置为0
+        loadingSpinner = findViewById(R.id.loading_spinner);
+
 
         // 创建透明度动画
         ObjectAnimator fadeIn = ObjectAnimator.ofFloat(logo, "alpha", 0f, 1f);
@@ -44,6 +49,11 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // 登录逻辑
+                loadingSpinner.setVisibility(View.VISIBLE);
+                usernameEditText.setEnabled(false);
+                passwordEditText.setEnabled(false);
+                loginButton.setEnabled(false);
+                registerButton.setEnabled(false);
                 String username = usernameEditText.getText().toString();
                 String password = passwordEditText.getText().toString();
                 loginUser(username, password);
