@@ -1,6 +1,10 @@
 package com.example.mynote;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,42 +67,41 @@ public class TodayPlanFragment extends Fragment {
     }
 
     private void addNewTaskInput() {
-        // 创建新的输入框和附件按钮的布局
-        LinearLayout newTaskInputLayout = new LinearLayout(getActivity());
-        newTaskInputLayout.setOrientation(LinearLayout.HORIZONTAL);
-        newTaskInputLayout.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        // 创建透明框的布局
+        Log.d("TodayPlanFragment", "addNewTaskInput called");
+        View transparentBox = new View(getActivity());
+        transparentBox.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 100));
+        transparentBox.setBackgroundColor(Color.LTGRAY); // 设置为透明
+        transparentBox.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), TaskDetailActivity.class);
+            startActivityForResult(intent, 1); // 启动 AddTaskActivity
+        });
 
-        EditText taskInput = new EditText(getActivity());
-        taskInput.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-        taskInput.setHint("输入今日计划内容");
+        taskListContainer.addView(transparentBox);
+    }
 
-        EditText expectedCompletionInput = new EditText(getActivity());
-        expectedCompletionInput.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-        expectedCompletionInput.setHint("预计完成时间");
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
+            String taskContent = data.getStringExtra("task_content");
+            String expectedCompletionTime = data.getStringExtra("expected_completion_time");
 
-        ImageButton attachButton = new ImageButton(getActivity());
-        attachButton.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        attachButton.setImageResource(android.R.drawable.ic_input_add);
-        attachButton.setContentDescription("添加附件");
-
-        newTaskInputLayout.addView(taskInput);
-        newTaskInputLayout.addView(expectedCompletionInput);
-        newTaskInputLayout.addView(attachButton);
-
-        taskListContainer.addView(newTaskInputLayout);
-
-        // 将任务信息添加到列表中
-        taskList.add(new Task(taskInput, expectedCompletionInput)); // 假设 Task 是自定义类
+            // 将任务信息添加到列表中
+            if (taskContent != null && expectedCompletionTime != null) {
+                taskList.add(new Task(taskContent, expectedCompletionTime)); // 假设 Task 是自定义类
+                // 这里可以更新 UI，例如重新加载任务列表
+            }
+        }
     }
 
     private void sendTasksToServer() {
         JSONArray tasksArray = new JSONArray();
 
         for (Task task : taskList) {
-            String taskContent = task.getTaskInput().getText().toString();
-            String expectedCompletionTime = task.getExpectedCompletionInput().getText().toString();
+            String taskContent = task.getTaskContent();
+            String expectedCompletionTime = task.getExpectedCompletionTime();
 
             if (!taskContent.isEmpty() && !expectedCompletionTime.isEmpty()) {
                 JSONObject taskObject = new JSONObject();

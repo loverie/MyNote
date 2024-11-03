@@ -1,37 +1,24 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <TextView
-        android:id="@+id/task_title_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:padding="16dp"/>
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <EditText
-        android:id="@+id/task_content_input"
+        android:id="@+id/task_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="输入任务内容"/>
+        android:hint="输入今日计划内容" />
 
     <EditText
         android:id="@+id/expected_completion_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="预计完成时间"/>
-
-    <ImageButton
-        android:id="@+id/attach_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_input_add"/>
+        android:hint="预计完成时间" />
 
     <Button
-        android:id="@+id/confirm_button"
+        android:id="@+id/save_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="确认"/>
+        android:text="保存" />
 </LinearLayout>

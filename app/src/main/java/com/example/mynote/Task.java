@@ -3,20 +3,19 @@ package com.example.mynote;
 import android.widget.EditText;
 
 public class Task {
-    private EditText taskInput;
-    private EditText expectedCompletionInput;
+    private String taskContent;
+    private String expectedCompletionTime;
 
-
-    public Task(EditText taskInput, EditText expectedCompletionInput) {
-        this.taskInput = taskInput;
-        this.expectedCompletionInput = expectedCompletionInput;
+    public Task(String taskContent, String expectedCompletionTime) {
+        this.taskContent = taskContent;
+        this.expectedCompletionTime = expectedCompletionTime;
     }
 
-    public EditText getTaskInput() {
-        return taskInput;
+    public String getTaskContent() {
+        return taskContent; // 返回任务内容的字符串
     }
 
-    public EditText getExpectedCompletionInput() {
-        return expectedCompletionInput;
+    public String getExpectedCompletionTime() {
+        return expectedCompletionTime; // 返回预计完成时间的字符串
     }
 }
