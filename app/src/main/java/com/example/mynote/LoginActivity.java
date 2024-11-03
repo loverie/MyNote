@@ -11,6 +11,9 @@ import android.widget.Toast;
 import android.widget.ImageView;
 import android.animation.ObjectAnimator;
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.io.OutputStream;
@@ -94,8 +97,25 @@ public class LoginActivity extends AppCompatActivity {
                     // 处理响应
                     int responseCode = conn.getResponseCode();
                     if (responseCode == HttpURLConnection.HTTP_OK) {
+                        InputStreamReader reader = new InputStreamReader(conn.getInputStream());
+                        BufferedReader bufferedReader = new BufferedReader(reader);
+                        StringBuilder response = new StringBuilder();
+                        String line;
+                        while ((line = bufferedReader.readLine()) != null) {
+                            response.append(line);
+                        }
+                        bufferedReader.close();
+
+                        // 解析 JSON 响应以获取用户 ID
+                        JSONObject jsonResponse = new JSONObject(response.toString());
+                        String message = jsonResponse.getString("message");
+                        int userId = jsonResponse.getInt("user_id"); // 假设用户ID包含在响应中
+
+                        // 存储用户ID到 UserSession
+                        UserSession.getInstance().setUserId(userId);
+
                         runOnUiThread(() -> {
-                            Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
                             finish(); // 结束登录界面
@@ -110,7 +130,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         }).start();
     }
-
 
 
 }

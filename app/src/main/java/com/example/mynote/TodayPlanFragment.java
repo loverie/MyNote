@@ -119,7 +119,8 @@ public class TodayPlanFragment extends Fragment {
     private void sendTasksToBackend(JSONArray tasksArray) {
         new Thread(() -> {
             try {
-                URL url = new URL("https://0975-202-113-189-209.ngrok-free.app/add_task"); // 替换为你的后端 URL
+                int userId = UserSession.getInstance().getUserId(); // 获取存储的用户 ID
+                URL url = new URL("https://0975-202-113-189-209.ngrok-free.app/add_task?user_id=" + userId); // 添加用户 ID 作为查询参数
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json; utf-8");

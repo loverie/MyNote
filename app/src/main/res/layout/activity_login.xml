@@ -104,10 +104,10 @@
 
     <ProgressBar
         android:id="@+id/loading_spinner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="32dp"
+        android:layout_height="52dp"
         android:layout_gravity="center"
-        android:visibility="t"
-        tools:layout_editor_absoluteX="165dp"
-        tools:layout_editor_absoluteY="601dp" />
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/login_button"
+        tools:layout_editor_absoluteX="165dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

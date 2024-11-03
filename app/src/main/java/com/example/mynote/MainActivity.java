@@ -22,6 +22,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton addTaskButton;
     private List<TodoItem> todoItems = new ArrayList<>();
     private TodoAdapter todoAdapter; // 创建适配器
+    private SwipeRefreshLayout swipeRefreshLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
         pendingTasksText = findViewById(R.id.pending_tasks_text);
         todoList = findViewById(R.id.todo_list);
         addTaskButton = findViewById(R.id.add_task_button);
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(this::loadTodoItems);
         // 设置RecyclerView
         todoList.setLayoutManager(new LinearLayoutManager(this));
         // 这里可以设置适配器
@@ -53,7 +57,9 @@ public class MainActivity extends AppCompatActivity {
         todoAdapter = new TodoAdapter(todoItems);
         todoList.setLayoutManager(new LinearLayoutManager(this));
         todoList.setAdapter(todoAdapter);
-
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            loadTodoItems(); // 刷新数据
+        });
         // 更新当前日期和未做事项
         updateDateAndPendingTasks();
         addTaskButton.setOnClickListener(v -> {
@@ -61,6 +67,11 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
         loadTodoItems();
+    }
+    private void stopRefreshing() {
+        runOnUiThread(() -> {
+            swipeRefreshLayout.setRefreshing(false); // 停止刷新动画
+        });
     }
     private void updateDateAndPendingTasks() {
         // 获取当前日期和星期
@@ -80,7 +91,8 @@ public class MainActivity extends AppCompatActivity {
     private void updatePendingTasksCount() {
         new Thread(() -> {
             try {
-                URL url = new URL("https://0975-202-113-189-209.ngrok-free.app/pending_tasks");
+                int userId = UserSession.getInstance().getUserId(); // 获取存储的用户 ID
+                URL url = new URL("https://0975-202-113-189-209.ngrok-free.app/pending_tasks?user_id=" + userId); // 添加用户 ID 作为查询参数
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
                 conn.setRequestProperty("Content-Type", "application/json");
@@ -112,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
     private void loadTodoItems() {
         new Thread(() -> {
             try {
-                int userId = 1; // 假设用户ID为1，实际使用时应从登录信息中获取
+                int userId = UserSession.getInstance().getUserId(); // 从登录信息中获取用户ID
                 URL url = new URL("https://0975-202-113-189-209.ngrok-free.app/user_pending_tasks?user_id=" + userId);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
@@ -136,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
                     // 更新UI，必须在主线程中
                     runOnUiThread(() -> {
-                        List<TodoItem> todoItems = new ArrayList<>();
+                        todoItems.clear(); // 清空旧数据
                         for (int i = 0; i < pendingTasks.length(); i++) {
                             JSONObject taskObject = null;
                             try {
@@ -156,17 +168,22 @@ public class MainActivity extends AppCompatActivity {
                             } catch (JSONException e) {
                                 throw new RuntimeException(e);
                             }
-
                             todoItems.add(new TodoItem(contentText, expectedCompletionTime));
                         }
 
-                        // 更新RecyclerView适配器
-                        TodoAdapter adapter = new TodoAdapter(todoItems);
-                        todoList.setAdapter(adapter);
+                        // 更新 RecyclerView
+                        todoAdapter.notifyDataSetChanged();
+
+                        // 更新当前日期和未做事项
+                        updateDateAndPendingTasks();
+
+                        // 停止刷新
+                        stopRefreshing();
                     });
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                stopRefreshing(); // 在异常情况下也要停止刷新
             }
         }).start();
     }
